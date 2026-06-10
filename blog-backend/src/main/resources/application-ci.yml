@@ -89,3 +89,19 @@ minio:
   accessKey: minioadmin
   secretKey: minioadmin123
   bucketName: blog
+
+mail:
+  link:
+    apply:
+      redirect-uri: http://localhost:8088/link/email/apply
+  article-email-notice: false
+  article-reply-notice: false
+  message-email-notice: false
+  message-new-notice: false
+  message-reply-notice: false
+  apply-notice: false
+  pass-notice: false
+
+web:
+  index:
+    path: http://localhost:5173/
