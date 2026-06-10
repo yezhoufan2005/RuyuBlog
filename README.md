@@ -150,13 +150,6 @@ Ruyu-Blog-master/
 └── .github/workflows/     # CI/CD 流水线
 ```
 
-## 致谢
-
-- [Hexo-Theme-Butterfly](https://github.com/jerryc127/hexo-theme-butterfly)
-- [Antdv Pro](https://docs.antdv-pro.com/)
-- [md-editor-v3](https://imzbf.github.io/md-editor-v3/)
-- [Heo 表情包](https://github.com/zhheo/Sticker-Heo)
-
 ## License
 
 本项目基于原作者 [kuailemao/Ruyu-Blog](https://github.com/kuailemao/Ruyu-Blog) 二次开发，保留原有 MIT 协议。
