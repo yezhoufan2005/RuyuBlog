@@ -23,6 +23,25 @@ spring:
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 6000
+          multiplier: 2
+          max-interval: 10000
+    queue:
+      email: email_queue
+      log-login: log_login_queue
+      log-system: log_system_queue
+    exchange:
+      email: email_exchange
+      log: log_exchange
+    routingKey:
+      email: email_routing_key
+      log-login: log_routing_key_login
+      log-system: log_routing_key_system
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
