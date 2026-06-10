@@ -64,7 +64,7 @@ class TestRegister:
         import redis as redis_lib
         redis_host = os.getenv("REDIS_HOST", "localhost")
         r = redis_lib.Redis(host=redis_host, port=6379, db=1)
-        r.setex(f"verifyCode:register:{email}", 300, f'"{test_code}"')
+        r.set(f"verifyCode:register:{email}", f'"{test_code}"', ex=300)
 
         resp = session.post(
             f"{api_base_url}/user/register",
@@ -86,7 +86,7 @@ class TestRegister:
         import redis as redis_lib
         redis_host = os.getenv("REDIS_HOST", "localhost")
         r = redis_lib.Redis(host=redis_host, port=6379, db=1)
-        r.setex(f"verifyCode:register:{email2}", 300, f'"{test_code}"')
+        r.set(f"verifyCode:register:{email2}", f'"{test_code}"', ex=300)
 
         resp = session.post(
             f"{api_base_url}/user/register",
