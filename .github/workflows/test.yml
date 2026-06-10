@@ -1,0 +1,89 @@
+name: API & UI 自动化测试
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch:   # 支持手动触发
+
+jobs:
+  api-test:
+    name: Pytest API 测试
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test123456
+          MYSQL_DATABASE: blog
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7.2-alpine
+        ports:
+          - 6379:6379
+
+      rabbitmq:
+        image: rabbitmq:3.13-management-alpine
+        ports:
+          - 5672:5672
+          - 15672:15672
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 安装 Python 依赖
+        run: pip install -r tests/requirements-test.txt
+
+      - name: 导入数据库
+        run: |
+          sudo apt-get install -y mysql-client
+          mysql -h 127.0.0.1 -u root -ptest123456 blog < sql/v1.5.0/Ruyu-Blog_v1.5.0.sql
+          mysql -h 127.0.0.1 -u root -ptest123456 blog < sql/v1.6.0/t_photo.sql
+
+      - name: 构建并启动后端
+        run: |
+          cd blog-backend
+          mvn clean package -DskipTests -q
+          java -jar target/blog-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=ci &
+          sleep 30
+
+      - name: 运行 API 测试
+        run: |
+          cd tests
+          python -m pytest api/ -v --alluredir=allure-results
+
+      - name: 生成 Allure 报告
+        if: always()
+        uses: simple-elf/allure-report-action@v1.7
+        with:
+          allure_results: tests/allure-results
+          allure_history: allure-history
+
+      - name: 发布 Allure 报告到 Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-history
+          keep_files: false
