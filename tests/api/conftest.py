@@ -45,24 +45,23 @@ def test_user_credentials(session, admin_session, api_base_url):
     email = f"testuser_{unique}@test.com"
     password = "Test123456"
 
-    # 通过 ask-code API 生成验证码并存入 Redis（邮件发送会失败但 code 已存）
-    import subprocess
+    # 通过 ask-code API 生成验证码并存入 Redis
+    import os
     session.get(f"{api_base_url}/public/ask-code", params={"email": email, "type": "register"})
 
-    # 从 Redis 读取验证码（FastJson 序列化格式：带引号的字符串）
-    result = subprocess.run(
-        ["docker", "exec", "redis", "redis-cli", "-n", "1", "GET", f"verifyCode:register:{email}"],
-        capture_output=True, text=True,
-    )
-    test_code = result.stdout.strip().strip('"')
+    # 直连 Redis 读取验证码（兼容本地 Docker 和 CI 环境）
+    import redis as redis_lib
+    redis_host = os.getenv("REDIS_HOST", "localhost")
+    r = redis_lib.Redis(host=redis_host, port=6379, db=1, decode_responses=True)
+    test_code = r.get(f"verifyCode:register:{email}")
+
     if not test_code:
-        # fallback: 手动写入（FastJson 序列化格式）
+        # FastJson 序列化格式：值带 JSON 引号
         test_code = "888888"
-        subprocess.run(
-            ["docker", "exec", "redis", "redis-cli", "-n", "1", "SET",
-             f"verifyCode:register:{email}", f'"{test_code}"', "EX", "300"],
-            capture_output=True,
-        )
+        r.setex(f"verifyCode:register:{email}", 300, f'"{test_code}"')
+    else:
+        # FastJson 反序列化：去除 JSON 引号
+        test_code = test_code.strip('"')
 
     # 注册
     resp = session.post(

@@ -1,6 +1,6 @@
 """认证相关测试：登录、注册、登出、用户信息"""
+import os
 import uuid
-import subprocess
 import pytest
 
 
@@ -61,11 +61,10 @@ class TestRegister:
         test_code = "888888"
 
         # 写入 Redis 验证码
-        subprocess.run(
-            ["docker", "exec", "redis", "redis-cli", "-n", "1", "SET",
-             f"verifyCode:register:{email}", f'"{test_code}"', "EX", "300"],
-            capture_output=True,
-        )
+        import redis as redis_lib
+        redis_host = os.getenv("REDIS_HOST", "localhost")
+        r = redis_lib.Redis(host=redis_host, port=6379, db=1)
+        r.setex(f"verifyCode:register:{email}", 300, f'"{test_code}"')
 
         resp = session.post(
             f"{api_base_url}/user/register",
@@ -84,11 +83,10 @@ class TestRegister:
         """重复用户名注册失败"""
         email2 = f"another_{uuid.uuid4().hex[:6]}@test.com"
         test_code = "888888"
-        subprocess.run(
-            ["docker", "exec", "redis", "redis-cli", "-n", "1", "SET",
-             f"verifyCode:register:{email2}", test_code, "EX", "300"],
-            capture_output=True,
-        )
+        import redis as redis_lib
+        redis_host = os.getenv("REDIS_HOST", "localhost")
+        r = redis_lib.Redis(host=redis_host, port=6379, db=1)
+        r.setex(f"verifyCode:register:{email2}", 300, f'"{test_code}"')
 
         resp = session.post(
             f"{api_base_url}/user/register",
