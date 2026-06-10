@@ -80,9 +80,9 @@ jobs:
           tar -xzf allure-2.32.2.tgz
           ./allure-2.32.2/bin/allure generate tests/allure-results -o allure-report --clean
 
-      - name: 发布 Allure 报告到 Pages
+      - name: 上传 Allure 报告
         if: always()
-        uses: peaceiris/actions-gh-pages@v4
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: allure-report
+          name: allure-report
+          path: allure-report
