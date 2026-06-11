@@ -1,5 +1,7 @@
 # Ruyu-Blog（如雨博客）
 
+[![API 测试](https://github.com/yezhoufan2005/RuyuBlog/actions/workflows/test.yml/badge.svg)](https://github.com/yezhoufan2005/RuyuBlog/actions)
+
 基于 SpringBoot3 + Vue3 的前后端分离个人博客系统。
 
 ## 项目截图
