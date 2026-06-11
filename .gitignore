@@ -15,8 +15,8 @@ target/
 *.iml
 
 # 测试
-allure-results/
-allure-report/
+**/allure-results/
+**/allure-report/
 .pytest_cache/
 __pycache__/
 test-results/
