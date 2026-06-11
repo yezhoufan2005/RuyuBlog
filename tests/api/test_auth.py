@@ -2,6 +2,7 @@
 import os
 import uuid
 import pytest
+import redis as redis_lib
 
 
 class TestLogin:
@@ -61,7 +62,6 @@ class TestRegister:
         test_code = "888888"
 
         # 写入 Redis 验证码
-        import redis as redis_lib
         redis_host = os.getenv("REDIS_HOST", "localhost")
         r = redis_lib.Redis(host=redis_host, port=6379, db=1)
         r.set(f"verifyCode:register:{email}", f'"{test_code}"', ex=300)
@@ -83,7 +83,6 @@ class TestRegister:
         """重复用户名注册失败"""
         email2 = f"another_{uuid.uuid4().hex[:6]}@test.com"
         test_code = "888888"
-        import redis as redis_lib
         redis_host = os.getenv("REDIS_HOST", "localhost")
         r = redis_lib.Redis(host=redis_host, port=6379, db=1)
         r.set(f"verifyCode:register:{email2}", f'"{test_code}"', ex=300)

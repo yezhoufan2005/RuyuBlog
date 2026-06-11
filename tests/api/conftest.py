@@ -2,6 +2,7 @@
 import os
 import uuid
 import pytest
+import redis as redis_lib
 import requests
 
 
@@ -50,7 +51,6 @@ def test_user_credentials(session, admin_session, api_base_url):
     session.get(f"{api_base_url}/public/ask-code", params={"email": email, "type": "register"})
 
     # 直连 Redis 读取验证码（兼容本地 Docker 和 CI 环境）
-    import redis as redis_lib
     redis_host = os.getenv("REDIS_HOST", "localhost")
     r = redis_lib.Redis(host=redis_host, port=6379, db=1, decode_responses=True)
     test_code = r.get(f"verifyCode:register:{email}")
